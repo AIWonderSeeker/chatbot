@@ -11,7 +11,7 @@ extra descriptive columns. Output is deterministic for a given --seed.
     python scripts/generate_fake_npi_data.py                       # 100 providers, 10,000 claims
     python scripts/generate_fake_npi_data.py --providers 1000 --claims 100000 --out-dir data/fake
 
-Standard library only, so it runs anywhere Python 3.12 does.
+Standard library only; runs on Python 3.9+ (e.g. AWS CloudShell's python3) as well as 3.12.
 """
 
 from __future__ import annotations
@@ -224,9 +224,9 @@ def generate_claims(
             orgs_by_state.setdefault(p.state, []).append(p.npi)
 
     claim_no = 0
-    for idx, (provider, volume) in enumerate(
-        zip(providers, _claim_volumes(rng, providers, total), strict=True)
-    ):
+    volumes = _claim_volumes(rng, providers, total)
+    assert len(volumes) == len(providers)
+    for idx, (provider, volume) in enumerate(zip(providers, volumes)):  # noqa: B905 - lengths checked; 3.9-safe
         if volume <= 0:
             continue
         # Each provider sees a panel of members; repeat visits are common.

@@ -14,3 +14,4 @@ infra/terraform/*.tfvars
 !infra/terraform/example.tfvars
 .DS_Store
 *.egg-info/
+data/

@@ -1,4 +1,4 @@
-.PHONY: setup lint typecheck test test-integration run-mcp run-api up down build evals
+.PHONY: setup lint typecheck test test-integration run-mcp run-api up down build evals fake-data
 
 # Requires Python 3.12+. Override with e.g. `make setup PYTHON=/path/to/python3.12`.
 PYTHON ?= python3.12
@@ -40,3 +40,6 @@ build:
 
 evals:
 	$(PY) scripts/run_evals.py --base-url $${BASE_URL:-http://localhost:8000}
+
+fake-data:
+	$(PY) scripts/generate_fake_npi_data.py

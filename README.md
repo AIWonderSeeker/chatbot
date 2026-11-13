@@ -127,6 +127,30 @@ Decided but not implemented:
 - **Authorization is not per-user.** Every authenticated user can query every provider through the single service role. The user's `sub` reaches the agent, so per-user scoping can be added at the tool layer or with Snowflake row access policies.
 - **There is no per-user rate limiting.** Global concurrency is capped per task. Add AWS WAF rate rules on the ALB if needed.
 
+## Fake NPI data for RDS PostgreSQL
+
+`scripts/generate_fake_npi_data.py` writes synthetic `providers.csv` and `claims.csv`
+(default 100 providers, 10,000 claims, 2024-2025) to `data/fake/`, which git ignores.
+All names, members, and amounts are invented. NPIs pass the same check-digit validation
+as the MCP server but are otherwise random, so some may coincidentally match real providers.
+The demo NPIs used by the UI, README, and evals are always included; `1003000035` gets only
+6 claims so small-cell suppression shows up.
+
+```bash
+make fake-data                                         # or: .venv/bin/python scripts/generate_fake_npi_data.py --help
+export PGHOST=<instance>.<id>.<region>.rds.amazonaws.com PGDATABASE=<db> PGUSER=<admin-user>
+infra/rds/load_postgres.sh                             # creates claims_app schema, loads CSVs, prints row counts
+```
+
+`infra/rds/postgres_schema.sql` creates `claims_app.providers` and `claims_app.claims`
+(foreign keys, check constraints, indexes matching the tool queries) and a read-only
+`nl_assistant_reader` role. The script connects with `sslmode=require`; supply the password via
+`~/.pgpass`, an RDS IAM auth token, or the psql prompt. Never commit it.
+
+Note: the MCP server currently queries Snowflake (or the in-memory SQLite mock). Loading
+this data into RDS gives you a realistic dataset to explore, but the app will not read from
+RDS until a PostgreSQL database client is added under `mcp_server/db/`.
+
 ## What remains
 
 | Area | State |

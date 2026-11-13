@@ -45,6 +45,12 @@ def _bind_params(params: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _region_from_arn(arn: str) -> str | None:
+    """arn:aws:secretsmanager:<region>:<account>:secret:<name> -> <region>; None lets boto3 decide."""
+    parts = arn.split(":")
+    return parts[3] if len(parts) > 3 and parts[0] == "arn" and parts[3] else None
+
+
 def _is_auth_failure(exc: BaseException) -> bool:
     # Connection-time errors from libpq often carry no sqlstate, only the message.
     if getattr(exc, "sqlstate", None) in (_SQLSTATE_BAD_LOGIN, _AUTH_FAILED):
@@ -75,7 +81,9 @@ class PostgresClient:
             if self._secrets_client is None:
                 import boto3
 
-                self._secrets_client = boto3.client("secretsmanager")
+                self._secrets_client = boto3.client(
+                    "secretsmanager", region_name=_region_from_arn(self._pg.secret_arn)
+                )
             try:
                 resp = self._secrets_client.get_secret_value(SecretId=self._pg.secret_arn)
                 password = json.loads(resp["SecretString"])["password"]

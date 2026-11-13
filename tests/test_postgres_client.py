@@ -183,6 +183,13 @@ def test_static_password_is_not_retried():
     assert len(calls) == 1
 
 
+def test_region_comes_from_secret_arn():
+    from mcp_server.db.postgres_client import _region_from_arn
+
+    assert _region_from_arn("arn:aws:secretsmanager:us-east-1:111122223333:secret:rds!db-x") == "us-east-1"
+    assert _region_from_arn("not-an-arn") is None
+
+
 def test_secret_errors_do_not_leak_details():
     class Broken:
         def get_secret_value(self, SecretId):  # noqa: N803

@@ -29,6 +29,7 @@ from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from mcp_server.config import ServerSettings
+from mcp_server.db.base import QueryExecutionError
 from mcp_server.tools import claims_tools, provider_tools
 from mcp_server.tools.registry import build_context
 from mcp_server.validation import ToolInputError
@@ -79,9 +80,13 @@ async def _run(tool: str, fn: Callable[[str], dict[str, Any]]) -> dict[str, Any]
     except ToolInputError as exc:
         status = "invalid_argument"
         raise ToolError(str(exc)) from exc
-    except Exception:  # noqa: BLE001 - details stay in logs, never in the response
+    except Exception as exc:  # noqa: BLE001 - details stay in logs, never in the response
         status = "error"
-        log.exception("tool failed", extra={"extra_fields": {"tool": tool}})
+        fields: dict[str, Any] = {"tool": tool, "error_type": type(exc).__name__}
+        if isinstance(exc, QueryExecutionError):
+            # These messages are written to be safe (query id, error class, sqlstate; no values).
+            fields["error"] = str(exc)[:300]
+        log.error("tool failed", extra={"extra_fields": fields})
         raise ToolError("The data query failed. Try again or narrow the request.") from None
     finally:
         log.info(

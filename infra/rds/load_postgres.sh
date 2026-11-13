@@ -6,7 +6,10 @@
 #   export PGHOST=<your-instance>.<id>.<region>.rds.amazonaws.com
 #   export PGPORT=5432 PGDATABASE=<db> PGUSER=<master-or-admin-user>
 #   export PGSSLMODE=require
-#   # Password: use ~/.pgpass, or an IAM auth token in PGPASSWORD, or let psql prompt.
+#   # Password: use ~/.pgpass, or an IAM auth token in PGPASSWORD, or let psql prompt,
+#   # or set RDS_SECRET_ARN to the RDS-managed master secret and the script reads it
+#   # with the AWS CLI (needs jq) without printing it.
+#   # Optional: PGSSLMODE=verify-full PGSSLROOTCERT=global-bundle.pem to verify the server.
 #
 # Usage:
 #   python scripts/generate_fake_npi_data.py        # writes data/fake/*.csv
@@ -20,6 +23,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 : "${PGDATABASE:?Set PGDATABASE}"
 : "${PGUSER:?Set PGUSER}"
 export PGSSLMODE="${PGSSLMODE:-require}"
+
+if [[ -z "${PGPASSWORD:-}" && -n "${RDS_SECRET_ARN:-}" ]]; then
+  echo "Reading database password from Secrets Manager ..."
+  PGPASSWORD="$(aws secretsmanager get-secret-value --secret-id "$RDS_SECRET_ARN" \
+    --query SecretString --output text | jq -r '.password')"
+  export PGPASSWORD
+fi
 
 for f in providers.csv claims.csv; do
   [[ -f "$DATA_DIR/$f" ]] || { echo "Missing $DATA_DIR/$f - run scripts/generate_fake_npi_data.py first" >&2; exit 1; }

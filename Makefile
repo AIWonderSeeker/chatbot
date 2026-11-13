@@ -1,4 +1,4 @@
-.PHONY: setup lint typecheck test test-integration run-mcp run-api up down build evals fake-data
+.PHONY: setup lint typecheck test test-integration run-mcp run-api up down build evals fake-data hooks check-secrets
 
 # Requires Python 3.12+. Override with e.g. `make setup PYTHON=/path/to/python3.12`.
 PYTHON ?= python3.12
@@ -43,3 +43,9 @@ evals:
 
 fake-data:
 	$(PY) scripts/generate_fake_npi_data.py
+
+hooks:
+	sh scripts/install_hooks.sh
+
+check-secrets:
+	python3 scripts/check_secrets.py --all

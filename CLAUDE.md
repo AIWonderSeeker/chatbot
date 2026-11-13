@@ -144,3 +144,10 @@ Environment variables locally; Secrets Manager injected as ECS secrets in AWS. `
 
 ## Definition of done
 A developer clones the repo, copies `.env.example` to `.env`, runs `docker compose up`, opens `http://localhost:8000`, asks a question, and sees an answer produced by a full fake-Bedrock -> MCP -> SQL cycle with the tool trail shown. With Bedrock access, real schema mappings, Snowflake key-pair credentials, and auth configured, the same code runs approved real queries. Tests pass; deployment steps are explicit.
+
+## Repository hygiene (always)
+This repository is public. Before every commit and push:
+- Run the secret scan (`make check-secrets`, or it runs automatically as the pre-commit hook once `make hooks` has been run in the clone). Never bypass it with `--no-verify`; fix the finding instead.
+- Never commit credentials, tokens, private keys, `.env`, `.pem`, Terraform state or real `.tfvars`, generated data (`data/`), or real AWS identifiers (account IDs, endpoints, secret ARNs, resource IDs, IPs). Use placeholders such as `111122223333` and `REPLACE_...` in code and docs.
+- Keep environment-specific values in git-ignored files (`.env`, `.secrets-denylist`, filled-in user data) or in AWS (Secrets Manager, task definitions).
+- `.secrets-denylist` (git-ignored, one literal per line) lists this environment's private identifiers so the scan blocks them; keep it up to date when new AWS resources are created.

@@ -127,6 +127,13 @@ Decided but not implemented:
 - **Authorization is not per-user.** Every authenticated user can query every provider through the single service role. The user's `sub` reaches the agent, so per-user scoping can be added at the tool layer or with Snowflake row access policies.
 - **There is no per-user rate limiting.** Global concurrency is capped per task. Add AWS WAF rate rules on the ALB if needed.
 
+## Secret scanning
+
+Run `make hooks` once after cloning: every commit is then scanned for credentials, key files,
+generated data, and real AWS identifiers (`scripts/check_secrets.py`). `make check-secrets`
+scans all tracked files. List your own environment's identifiers (account ID, endpoints,
+resource IDs) in a git-ignored `.secrets-denylist`, one per line, so they are blocked too.
+
 ## Fake NPI data for RDS PostgreSQL
 
 `scripts/generate_fake_npi_data.py` writes synthetic `providers.csv` and `claims.csv`

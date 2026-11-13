@@ -61,6 +61,7 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.params.Depends"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S", "B"]
+"scripts/check_secrets.py" = ["S603", "S607"]  # runs the local git CLI with fixed arguments
 
 [tool.mypy]
 python_version = "3.12"

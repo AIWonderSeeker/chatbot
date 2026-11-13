@@ -1,0 +1,10 @@
+# Overlay for the single-EC2 demo (see infra/ec2-demo/README.md):
+#   docker compose -f docker-compose.yml -f infra/ec2-demo/compose.ec2.yml up -d --build
+services:
+  mcp:
+    restart: unless-stopped
+    volumes:
+      # RDS CA bundle for PG_SSLMODE=verify-full
+      - /opt/chatbot-certs:/certs:ro
+  api:
+    restart: unless-stopped

@@ -55,12 +55,16 @@ app/                       # FastAPI service (no Snowflake code here)
   storage/                 # ConversationStore: memory, dynamodb
   core/config.py  core/logging.py  core/middleware.py
   static/index.html  static/app.js  static/styles.css
-mcp_server/                # MCP service (only place that touches Snowflake)
+mcp_server/                # MCP service (only place that touches the database)
   server.py                # FastMCP app, auth middleware, /health
   config.py  validation.py  schema_mapping.py  queries.py  results.py
-  db/base.py  db/snowflake_client.py  db/sqlite_mock.py
+  db/base.py  db/snowflake_client.py  db/postgres_client.py  db/sqlite_mock.py   # DB_BACKEND selects
   tools/provider_tools.py  tools/claims_tools.py
-tests/   evals/   scripts/   infra/terraform/   infra/snowflake/
+tests/   evals/   docs/STATUS.md
+scripts/                   # generate_fake_npi_data.py, check_secrets.py, run_evals.py, install_hooks.sh
+infra/terraform/ (production design)  infra/ec2-demo/ (running demo)  infra/rds/  infra/snowflake/
+.claude/                   # Claude Code config: settings + hooks, agents/, skills/ (see "Working with Claude Code")
+.githooks/  .github/workflows/ci.yml
 ```
 Keep the FastAPI app, MCP server, and Snowflake layers separate. `app/` must never import `mcp_server/` (tests may).
 
@@ -151,3 +155,11 @@ This repository is public. Before every commit and push:
 - Never commit credentials, tokens, private keys, `.env`, `.pem`, Terraform state or real `.tfvars`, generated data (`data/`), or real AWS identifiers (account IDs, endpoints, secret ARNs, resource IDs, IPs). Use placeholders such as `111122223333` and `REPLACE_...` in code and docs.
 - Keep environment-specific values in git-ignored files (`.env`, `.secrets-denylist`, filled-in user data) or in AWS (Secrets Manager, task definitions).
 - `.secrets-denylist` (git-ignored, one literal per line) lists this environment's private identifiers so the scan blocks them; keep it up to date when new AWS resources are created.
+
+## Working with Claude Code in this repo
+- **Start of a session:** read `docs/STATUS.md` (public status) and the `project-status` memory (private details, if present) before proposing work.
+- **Skills** (`.claude/skills/`): `preflight` before any commit/PR; `add-mcp-tool` for every new question type; `deploy-demo` to redeploy and verify the EC2 demo (confirm with the user first); `update-status` at the end of a work session.
+- **Subagents** (`.claude/agents/`): `security-reviewer` (read-only review of a diff against the rules in this file) and `aws-inspector` (read-only AWS state, exposure, and cost). Use them for an independent read rather than reviewing your own change.
+- **Guardrails:** `.claude/settings.json` denies reading `.env`, key files, and `.secrets-denylist`, and a PreToolUse hook (`.claude/hooks/guard_git.py`) runs the secret scan before `git commit`/`git push` and blocks `--no-verify` and force pushes. CI (`.github/workflows/ci.yml`) repeats lint, types, tests, and the secret scan on every push.
+- **AWS changes** (creating, modifying, or deleting resources) always need the user's explicit approval for that action. Keep resource IDs out of the repo.
+- **Commands for the user:** say where each runs (their Mac vs AWS CloudShell); prefer doing AWS steps yourself via the CLI/SSM with approval.

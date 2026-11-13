@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>Claims data assistant</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%231F6C70'/><path d='M4 5h8M4 8h8M4 11h5' stroke='white' stroke-width='1.5'/></svg>">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <h1>Claims data assistant</h1>
+      <span id="env-badge" class="badge" hidden></span>
+      <button id="new-chat" class="ghost" type="button" aria-label="New conversation">New<span class="wide-only"> conversation</span></button>
+    </div>
+  </header>
+
+  <main id="log" class="log" aria-live="polite" aria-label="Conversation">
+    <section id="empty" class="empty">
+      <p class="empty-lead">Ask about providers and claims. Answers come only from approved data lookups, and each one lists the lookups it used.</p>
+      <div class="examples" role="list">
+        <button type="button" class="example" role="listitem">Who is provider 1234567893?</button>
+        <button type="button" class="example" role="listitem">Summarize claims for provider 1234567893 in 2025</button>
+        <button type="button" class="example" role="listitem">How many claims were in each status between 2025-01-01 and 2025-06-30?</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="composer-wrap">
+    <form id="composer" class="composer" autocomplete="off">
+      <label for="input" class="visually-hidden">Your question</label>
+      <textarea id="input" rows="1" maxlength="2000" placeholder="Ask about a provider or claims" required></textarea>
+      <button id="send" type="submit">Ask</button>
+    </form>
+    <p class="hint">Enter to ask, Shift+Enter for a new line. Don't paste member identifiers.</p>
+  </footer>
+
+  <template id="tpl-user">
+    <article class="msg msg-user"><p class="msg-text"></p></article>
+  </template>
+  <template id="tpl-assistant">
+    <article class="msg msg-assistant">
+      <p class="msg-text"></p>
+      <ul class="receipt" aria-label="Data lookups used"></ul>
+    </article>
+  </template>
+  <template id="tpl-pending">
+    <article class="msg msg-assistant pending" aria-busy="true">
+      <p class="msg-text"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>Checking the data</p>
+    </article>
+  </template>
+  <template id="tpl-error">
+    <article class="msg msg-error" role="alert">
+      <p class="msg-text"></p>
+      <button type="button" class="retry">Try again</button>
+    </article>
+  </template>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

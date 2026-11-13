@@ -1,0 +1,10 @@
+{
+  "tables": {
+    "providers": "ANALYTICS.CLAIMS_APP.V_PROVIDERS",
+    "claims": "ANALYTICS.CLAIMS_APP.V_CLAIMS"
+  },
+  "claims": {
+    "provider_npi": "BILLING_NPI",
+    "claim_date": "RECEIVED_DATE"
+  }
+}

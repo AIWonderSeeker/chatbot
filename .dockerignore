@@ -1,0 +1,16 @@
+.git
+.venv
+.env
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+secrets/
+*.p8
+*.pem
+infra/
+tests/
+evals/
+scripts/

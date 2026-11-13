@@ -1,0 +1,23 @@
+# Local stack. With the defaults in .env.example this runs with zero credentials:
+# fake Bedrock in the API, seeded SQLite behind the real SQL templates in MCP.
+services:
+  mcp:
+    build: { context: ., target: mcp }
+    env_file: .env
+    environment:
+      MCP_PORT: "8001"
+    expose: ["8001"]
+    # Uncomment to mount a private key for real Snowflake key-pair auth:
+    # volumes: ["./secrets/snowflake_rsa_key.p8:/run/secrets/snowflake_key:ro"]
+
+  api:
+    build: { context: ., target: api }
+    env_file: .env
+    environment:
+      MCP_SERVER_URL: http://mcp:8001/mcp
+    ports: ["8000:8000"]
+    depends_on:
+      mcp: { condition: service_healthy }
+    # For real Bedrock locally, pass credentials via your AWS profile:
+    # volumes: ["~/.aws:/home/appuser/.aws:ro"]
+    # environment: { AWS_PROFILE: my-profile, MOCK_BEDROCK: "false" }

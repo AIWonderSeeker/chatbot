@@ -21,7 +21,7 @@ standing in until Amazon Bedrock access is enabled.
 | MCP server with 3 tools, input validation, small-cell suppression | Working | `mcp_server/` |
 | Database backends: SQLite mock, Snowflake, **PostgreSQL / RDS** | Mock + RDS verified; Snowflake untested live | `mcp_server/db/` |
 | Synthetic data generator + RDS schema/loader | Working; data loaded in RDS | `scripts/generate_fake_npi_data.py`, `infra/rds/` |
-| Demo hosting (one EC2, Docker Compose) | Running, verified end to end | `infra/ec2-demo/` |
+| Demo hosting (one EC2, Docker Compose) | Verified end to end; **stopped between sessions** to save cost (`make aws-start` / `aws-stop`) | `infra/ec2-demo/`, `scripts/aws_demo.sh` |
 | Fake model (`MOCK_BEDROCK=true`) | In use | `app/agent/fake_bedrock.py` |
 | Real model (Claude on Bedrock) | Code ready; account access pending | `app/agent/bedrock_client.py` |
 | Production hosting (ECS Fargate, HTTPS ALB + OIDC, DynamoDB) | Terraform written, never applied | `infra/terraform/` |
@@ -70,3 +70,4 @@ http://localhost:8000. Redeploy the demo after pushing: see `infra/ec2-demo/READ
 | 2026-11-13 | Synthetic NPI/claims generator; RDS PostgreSQL schema and loader |
 | 2026-11-13 | PostgreSQL backend for the MCP server; EC2 demo deployed against RDS |
 | 2026-11-13 | Secret scanning hook; Claude Code project config (agents, skills, hooks); CI |
+| 2026-11-13 | AWS start/stop script; demo resources stopped between sessions |

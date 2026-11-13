@@ -1,4 +1,4 @@
-.PHONY: setup lint typecheck test test-integration run-mcp run-api up down build evals fake-data hooks check-secrets
+.PHONY: setup lint typecheck test test-integration run-mcp run-api up down build evals fake-data hooks check-secrets aws-status aws-start aws-stop
 
 # Requires Python 3.12+. Override with e.g. `make setup PYTHON=/path/to/python3.12`.
 PYTHON ?= python3.12
@@ -49,3 +49,12 @@ hooks:
 
 check-secrets:
 	python3 scripts/check_secrets.py --all
+
+aws-status:
+	scripts/aws_demo.sh status
+
+aws-start:
+	scripts/aws_demo.sh start --wait
+
+aws-stop:
+	scripts/aws_demo.sh stop

@@ -60,6 +60,26 @@ the foundation models it routes to, then in `/opt/chatbot/.env` set `MOCK_BEDROC
 
 **Your IP changed:** update the security group's port 8000 rule.
 
+## Cost control (stop between sessions)
+
+The instance and the RDS database are tagged `Project=chatbot-demo`. Stopped, they cost only
+storage (a few dollars a month) instead of ~$30/month running.
+
+```bash
+make aws-status     # state of each, and the app URL when running
+make aws-start      # start both and wait until the app answers /health
+make aws-stop       # stop both
+```
+
+`scripts/aws_demo.sh` finds resources by tag (no IDs in the repo) and uses your AWS CLI sign-in.
+To start/stop automatically with Claude Code sessions, add SessionStart/SessionEnd hooks that call
+`scripts/aws_demo.sh start --hook` / `stop --hook` to your git-ignored `.claude/settings.local.json`
+(with `CHATBOT_AWS_PROFILE=<your SSO profile>` if you use a named profile).
+
+Things to know: the public IP changes on every start; the security group only admits your own
+IP; Docker brings both containers back up on boot; and AWS automatically restarts a stopped RDS
+instance after 7 days, so stop it again if the project sits idle longer than that.
+
 ## Tear down
 
 Terminate the instance, then delete the security group and the instance profile/role

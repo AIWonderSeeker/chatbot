@@ -25,6 +25,8 @@ mcp-server = [
   "uvicorn[standard]>=0.30",
   "snowflake-connector-python>=3.12",
   "cryptography>=42",
+  "psycopg[binary]>=3.2,<4",
+  "boto3>=1.35",
 ]
 dev = [
   "nl-snowflake-assistant[api,mcp-server]",

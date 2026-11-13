@@ -158,7 +158,7 @@ class BearerAuthMiddleware:
 
 
 async def health(_: Request) -> JSONResponse:
-    return JSONResponse({"status": "ok", "mock_snowflake": settings.mock_snowflake})
+    return JSONResponse({"status": "ok", "db_backend": settings.backend})
 
 
 _starlette_app = mcp.streamable_http_app()  # serves POST /mcp; lifespan runs the session manager

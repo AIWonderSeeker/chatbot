@@ -147,9 +147,13 @@ infra/rds/load_postgres.sh                             # creates claims_app sche
 `nl_assistant_reader` role. The script connects with `sslmode=require`; supply the password via
 `~/.pgpass`, an RDS IAM auth token, or the psql prompt. Never commit it.
 
-Note: the MCP server currently queries Snowflake (or the in-memory SQLite mock). Loading
-this data into RDS gives you a realistic dataset to explore, but the app will not read from
-RDS until a PostgreSQL database client is added under `mcp_server/db/`.
+To have the MCP server query it, set `DB_BACKEND=postgres`, the `PG_*` settings in
+`.env.example` (prefer `PG_SECRET_ARN` for the RDS-managed master secret, which is re-read
+after rotation), and
+`SCHEMA_MAPPING_JSON={"tables":{"providers":"claims_app.providers","claims":"claims_app.claims"}}`.
+The same SQL templates run unchanged; sessions are TLS (`verify-full` by default), read-only,
+and time-limited. For anything beyond fake data, connect as a login user granted
+`nl_assistant_reader` rather than the master user.
 
 ## What remains
 

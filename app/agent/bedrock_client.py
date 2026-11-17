@@ -35,7 +35,7 @@ class BedrockConverseClient:
         region: str,
         model_id: str,
         max_tokens: int,
-        temperature: float,
+        temperature: float | None,
         connect_timeout_s: float,
         read_timeout_s: float,
         max_attempts: int,
@@ -45,7 +45,9 @@ class BedrockConverseClient:
         from botocore.config import Config
 
         self._model_id = model_id  # foundation model ID or inference profile ID/ARN
-        self._inference = {"maxTokens": max_tokens, "temperature": temperature}
+        self._inference: dict[str, Any] = {"maxTokens": max_tokens}
+        if temperature is not None:  # omitted by default: some models reject it
+            self._inference["temperature"] = temperature
         self._client = boto3.client(
             "bedrock-runtime",
             config=Config(

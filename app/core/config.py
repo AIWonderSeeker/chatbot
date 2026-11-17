@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, SecretStr, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     aws_region: str = "us-east-1"
     bedrock_model_id: str = "REPLACE_WITH_MODEL_OR_INFERENCE_PROFILE_ID"
     bedrock_max_tokens: int = Field(1024, ge=64, le=8192)
-    bedrock_temperature: float = Field(0.0, ge=0.0, le=1.0)
+    # Unset/empty = model default. Newer Claude models (e.g. Sonnet 5) reject `temperature`.
+    bedrock_temperature: float | None = Field(None, ge=0.0, le=1.0)
     bedrock_connect_timeout_seconds: float = 5.0
     bedrock_read_timeout_seconds: float = 60.0
     bedrock_max_attempts: int = Field(4, ge=1, le=10)
@@ -58,6 +59,11 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> list[str]:
         return [o.strip() for o in self.cors_allowed_origins.split(",") if o.strip()]
+
+    @field_validator("bedrock_temperature", mode="before")
+    @classmethod
+    def _empty_temperature_is_unset(cls, value: object) -> object:
+        return None if isinstance(value, str) and not value.strip() else value
 
     @model_validator(mode="after")
     def _check(self) -> Settings:
